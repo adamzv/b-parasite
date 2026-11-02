@@ -20,6 +20,9 @@ typedef struct {
   uint16_t relative;
   // In [0, 1.0].
   float percentage;
+  // Same scale as percentage (0 = in air, 1 = in water) but not clamped, so readings past either
+  // calibration point stay visible.
+  float unclamped_percentage;
 } prst_adc_soil_moisture_t;
 
 typedef struct prst_adc_photo_sensor {

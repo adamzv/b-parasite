@@ -2,9 +2,12 @@
 
 #include <zboss_api_addons.h>
 
+#include "bparasite_build_identity.h"
 #include "prst_zb_endpoint_defs.h"
 
 void prst_zb_attrs_init(struct zb_device_ctx *dev_ctx) {
+  // A runtime pointer keeps the identity literal available for image inspection.
+  static const char *volatile build_id = PRST_FIRMWARE_BUILD_ID;
   dev_ctx->basic_attr.zcl_version = ZB_ZCL_VERSION;
   dev_ctx->basic_attr.power_source = ZB_ZCL_BASIC_POWER_SOURCE_BATTERY;
   ZB_ZCL_SET_STRING_VAL(
@@ -19,8 +22,13 @@ void prst_zb_attrs_init(struct zb_device_ctx *dev_ctx) {
 
   ZB_ZCL_SET_STRING_VAL(
       dev_ctx->basic_attr.date_code,
-      CONFIG_PRST_ZB_BUILD_DATE,
-      ZB_ZCL_STRING_CONST_SIZE(CONFIG_PRST_ZB_BUILD_DATE));
+      PRST_FIRMWARE_BUILD_DATE,
+      ZB_ZCL_STRING_CONST_SIZE(PRST_FIRMWARE_BUILD_DATE));
+
+  ZB_ZCL_SET_STRING_VAL(
+      dev_ctx->basic_attr.sw_ver,
+      build_id,
+      ZB_ZCL_STRING_CONST_SIZE(PRST_FIRMWARE_BUILD_ID));
 
   dev_ctx->basic_attr.hw_version = CONFIG_PRST_ZB_HARDWARE_VERSION;
 

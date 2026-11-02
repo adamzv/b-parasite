@@ -50,7 +50,8 @@ static void sw1_factory_reset_check_timer_cb(struct k_timer *timer_id) {
     LOG_DBG("SW1 button was released, will not factory reset device");
     return;
   }
-  ZB_SCHEDULE_APP_CALLBACK(timer_do_reset, /*param=*/0);
+  // Timer callbacks run in an ISR; only zigbee_schedule_callback() may hand work to ZBOSS from there.
+  zigbee_schedule_callback(timer_do_reset, /*param=*/0);
 }
 
 K_TIMER_DEFINE(sw1_factory_reset_check_timer, sw1_factory_reset_check_timer_cb, NULL);

@@ -2,16 +2,20 @@
 #define _PRST_ZB_H_
 
 #include "prst_zb_soil_moisture_defs.h"
+#include "prst_zb_soil_calibration.h"
 
 #define PRST_ZIGBEE_ENDPOINT 10
 #define PRST_BASIC_MANUF_NAME "b-parasite"
 
 #define PRST_ZB_DEVICE_ID 0x0008
 #define PRST_ZB_DEVICE_VERSION 0
-#define PRST_ZB_IN_CLUSTER_NUM 7
+#define PRST_ZB_IN_CLUSTER_NUM 8
 #define PRST_ZB_OUT_CLUSTER_NUM 0
 #define PRST_ZB_CLUSTER_NUM (PRST_ZB_IN_CLUSTER_NUM + PRST_ZB_OUT_CLUSTER_NUM)
-#define PRST_ZB_ATTR_REPORTING_COUNT 5
+// ZBOSS takes a slot per reportable attribute at startup in cluster-list order and restores configured records from
+// NVRAM; with no slot left the last cluster (calibration) silently gets no default record and every configReport
+// for it fails with FAILURE. Keep well above the number of reportable attributes.
+#define PRST_ZB_ATTR_REPORTING_COUNT 20
 
 #define PRST_ZB_DECLARE_CLUSTER_LIST(                                       \
     cluster_list_name,                                                      \
@@ -21,7 +25,8 @@
     rel_humidity_attr_list,                                                 \
     batt_att_list,                                                          \
     soil_moisture_attr_list,                                                \
-    illuminance_attr_list)                                                  \
+    illuminance_attr_list,                                                  \
+    soil_calibration_attr_list)                                             \
   zb_zcl_cluster_desc_t cluster_list_name[] =                               \
       {                                                                     \
           ZB_ZCL_CLUSTER_DESC(                                              \
@@ -65,6 +70,12 @@
               ZB_ZCL_ARRAY_SIZE(batt_attr_list, zb_zcl_attr_t),             \
               (batt_attr_list),                                             \
               ZB_ZCL_CLUSTER_SERVER_ROLE,                                   \
+              ZB_ZCL_MANUF_CODE_INVALID),                                   \
+          ZB_ZCL_CLUSTER_DESC(                                              \
+              PRST_ZB_ZCL_CLUSTER_ID_SOIL_CALIBRATION,                      \
+              ZB_ZCL_ARRAY_SIZE(soil_calibration_attr_list, zb_zcl_attr_t), \
+              (soil_calibration_attr_list),                                 \
+              ZB_ZCL_CLUSTER_SERVER_ROLE,                                   \
               ZB_ZCL_MANUF_CODE_INVALID)}
 
 #define PRST_ZB_DECLARE_SIMPLE_DESC(ep_name, ep_id, in_clust_num, out_clust_num) \
@@ -87,6 +98,7 @@
               PRST_ZB_ZCL_ATTR_SOIL_MOISTURE_CLUSTER_ID,                         \
               ZB_ZCL_CLUSTER_ID_ILLUMINANCE_MEASUREMENT,                         \
               ZB_ZCL_CLUSTER_ID_POWER_CONFIG,                                    \
+              PRST_ZB_ZCL_CLUSTER_ID_SOIL_CALIBRATION,                           \
           }}
 
 #define PRST_ZB_DECLARE_ENDPOINT(ep_name, ep_id, cluster_list)                                      \

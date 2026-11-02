@@ -8,6 +8,39 @@ config PRST_ZB_PARENT_POLL_INTERVAL_SEC
 	int "Interval for when b-parasite polls its parent for data in seconds."
 	default 10
 
+config PRST_ZB_INTERVIEW_POLL_INTERVAL_MS
+	int "Parent poll interval right after joining, so the coordinator's interview gets timely answers."
+	default 1000
+
+config PRST_ZB_BUTTON_POLL_DURATION_SEC
+    int "Receive window after a single SW1 measurement request."
+    range 1 300
+    default 60
+
+config PRST_ZB_INTERVIEW_DURATION_SEC
+	int "How long to keep the fast interview poll interval before switching to the regular one."
+	default 180
+
+config PRST_ZB_CALIBRATION_SLEEP_DURATION_SEC
+	int "Sensor read interval in calibration mode, which a short SW1 press starts."
+	default 10
+
+config PRST_ZB_CALIBRATION_DURATION_SEC
+	int "How long calibration mode lasts after the last SW1 press."
+	default 900
+
+config PRST_ZB_CALIBRATION_SETTLE_SEC
+	int "Wait before the first dry/wet capture reading, while the soil around a freshly inserted probe settles."
+	default 180
+
+config PRST_ZB_CALIBRATION_CAPTURE_SAMPLES
+	int "Readings whose median becomes the dry (SW1 x2) or wet (SW1 x3) calibration point."
+	default 9
+
+config PRST_ZB_BUTTON_MULTI_PRESS_GAP_MS
+	int "Pause after the last SW1 press that ends a multi-press sequence."
+	default 800
+
 config PRST_ZB_BUILD_DATE
   string "Zigbee basic cluster build date attribute. Max 16 bytes."
   default ""
@@ -38,6 +71,20 @@ config PRST_ZB_FACTORY_RESET_DISABLED
 
 endchoice  # PRST_ZB_FACTORY_RESET_METHOD
 
-config PRST_ZB_RESTART_WATCHDOG_TIMEOUT_SEC
-    int "Duration after the device will restart the rejoin procedure if a network has not been successfully joined."
+config PRST_ZB_BOOT_LOOP_LIMIT
+    int "Crash resets in a row, without a stable run between them, after which boot waits before starting Zigbee."
+    default 5
+
+config PRST_ZB_BOOT_LOOP_BACKOFF_SEC
+    int "How long a boot waits, radio off, once PRST_ZB_BOOT_LOOP_LIMIT is reached."
     default 3600
+
+config PRST_ZB_RESTART_WATCHDOG_TIMEOUT_SEC
+    int "Initial pause before retrying network recovery until explicitly stopped."
+    range 1 2147483647
+    default 3600
+
+config PRST_ZB_RESTART_WATCHDOG_MAX_TIMEOUT_SEC
+    int "Maximum pause between recovery requests, doubling after each request."
+    range PRST_ZB_RESTART_WATCHDOG_TIMEOUT_SEC 2147483647
+    default 7200

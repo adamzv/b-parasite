@@ -1,3 +1,11 @@
 module = PRSTLIB
 module-str = prstlib
 source "subsys/logging/Kconfig.template.log_config"
+
+config PRSTLIB_PHOTO_NA_PER_LUX
+	int "Phototransistor photocurrent per lux, in nA"
+	default 150
+	help
+	  Per-board calibration factor. ALS-PT19 datasheet: typical 150 uA at 1000 lx
+	  (white LED/fluorescent), minimum 50, so individual parts differ up to 3x.
+	  Incandescent light gives about 3.5x more current per lux.

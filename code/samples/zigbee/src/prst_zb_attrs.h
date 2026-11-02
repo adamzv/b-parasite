@@ -3,6 +3,8 @@
 
 #include <zboss_api_addons.h>
 
+#include "prst_zb_soil_calibration.h"
+
 // Relative humimdity cluster - section 4.7.2.2.1.
 typedef struct {
   // 100x relative humidity (mandatory).
@@ -23,6 +25,9 @@ typedef struct {
   zb_uint8_t quantity;
   // Enumeration of battery size
   enum zb_zcl_power_config_battery_size_e size;
+  // Never raised, but ZBOSS declares the state reportable and reads it when a report is due, so both need storage.
+  zb_uint8_t alarm_mask;
+  zb_uint32_t alarm_state;
 } prst_batt_attrs_t;
 
 // Soil moisture cluster.
@@ -45,6 +50,7 @@ struct zb_device_ctx {
   prst_batt_attrs_t batt_attrs;
   prst_soil_moisture_attrs_t soil_moisture_attrs;
   prst_illuminancce_attrs_t illuminance_attrs;
+  prst_soil_calibration_attrs_t soil_calibration_attrs;
 };
 
 void prst_zb_attrs_init(struct zb_device_ctx *dev_ctx);
