@@ -53,7 +53,7 @@ uint32_t prst_boot_loop_guard_register_boot(bool crash_reset) {
 }
 
 // Flash writes stall the radio, so they stay off the Zigbee thread.
-static void clear_work_handler(struct k_work *work) {
+static void clear_work_handler(struct k_work* work) {
   int err = fs_unlink(kBootsFile);
   if (err != 0 && err != -ENOENT) {
     LOG_ERR("Unable to clear %s: %d", kBootsFile, err);

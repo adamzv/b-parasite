@@ -21,7 +21,7 @@ static int write_cmd(uint16_t command) {
 }
 
 // CRC-8 from the datasheet: polynomial 0x31, init 0xFF, over each 2-byte word.
-static uint8_t crc8(const uint8_t *data) {
+static uint8_t crc8(const uint8_t* data) {
   uint8_t crc = 0xff;
   for (int i = 0; i < 2; i++) {
     crc ^= data[i];
@@ -32,7 +32,7 @@ static uint8_t crc8(const uint8_t *data) {
   return crc;
 }
 
-int prst_shtc3_read(prst_shtc3_read_t *out) {
+int prst_shtc3_read(prst_shtc3_read_t* out) {
   RET_IF_ERR_MSG(!device_is_ready(shtc3.bus), "SHTC3 is not ready");
 
   int sleep_err;

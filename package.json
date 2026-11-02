@@ -1,0 +1,10 @@
+{
+  "name": "b-parasite-firmware-tests",
+  "private": true,
+  "engines": {"node": ">=22"},
+  "scripts": {"test": "bash code/tests/run.sh"},
+  "devDependencies": {
+    "zigbee-herdsman": "10.6.0",
+    "zigbee-herdsman-converters": "26.76.0"
+  }
+}

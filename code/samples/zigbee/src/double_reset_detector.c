@@ -11,7 +11,7 @@
 
 LOG_MODULE_REGISTER(double_reset_detector, CONFIG_LOG_DEFAULT_LEVEL);
 
-static const char *flag_filename = "/lfs/reset_flag";
+static const char* flag_filename = "/lfs/reset_flag";
 
 static const char flag_prefix[] = "prst-rst-count";
 
@@ -21,7 +21,7 @@ static int erase_flag() {
   return fs_unlink(flag_filename);
 }
 
-void erase_flag_callback(struct k_work *work) {
+void erase_flag_callback(struct k_work* work) {
   LOG_INF("Erasing double reset flag.");
   if (erase_flag() != 0) {
     LOG_ERR("Error deleting flag");

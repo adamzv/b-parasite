@@ -4,14 +4,32 @@
 
 # west workspace lives under code/ (workspace top dir)
 /code/.west/
-/code/bootloader/
-/code/modules/
-/code/nrf/
-/code/nrfxlib/
-/code/test/
-/code/tools/
-/code/zephyr/
-/code/ncs-zigbee/
+/code/bootloader
+/code/modules
+/code/nrf
+/code/nrfxlib
+/code/test
+/code/tools
+/code/zephyr
+/code/ncs-zigbee
 
 # west build output dirs
 **/build_*/
+**/build/
+**/__pycache__/
+*.py[cod]
+node_modules/
+.venv/
+.superpowers/
+.claude/
+.env
+.env.*
+!.env.example
+/ha/
+/flashing/backups/
+/flashing/releases/
+/dist/
+/data/*.json
+/data/*-log.md
+/data/*-review-*.md
+/*.zip

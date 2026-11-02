@@ -1,10 +1,10 @@
 #ifndef _PRST_DATA_H_
 #define _PRST_DATA_H_
 
+#include <zephyr/sys/util.h>
+
 #include "prstlib/adc.h"
 #include "prstlib/shtc3.h"
-
-#include <zephyr/sys/util.h>
 
 typedef struct {
   prst_adc_soil_moisture_t soil;
@@ -21,6 +21,6 @@ typedef struct {
 
 // Reads every sensor even when one fails, so a dead sensor does not take the others down. Returns the
 // PRST_SENSOR_* bits of the failed reads (0 when all succeeded); failed fields keep their previous values.
-int prst_sensors_read_all(prst_sensors_t *out);
+int prst_sensors_read_all(prst_sensors_t* out);
 
 #endif  // _PRST_DATA_H_

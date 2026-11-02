@@ -1,10 +1,11 @@
 #include <stdio.h>
-#include "zboss_api_addons.h"
+
 #include "bparasite_build_identity.h"
+#include "zboss_api_addons.h"
 
 zb_zcl_status_t zb_zcl_set_attr_val(uint8_t endpoint, uint16_t cluster,
-                                 uint8_t role, uint16_t attribute,
-                                 uint8_t *data, uint8_t check_access) {
+                                    uint8_t role, uint16_t attribute,
+                                    uint8_t* data, uint8_t check_access) {
   return 0;
 }
 

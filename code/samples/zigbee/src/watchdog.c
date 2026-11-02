@@ -11,7 +11,7 @@
 LOG_MODULE_REGISTER(watchdog, CONFIG_LOG_DEFAULT_LEVEL);
 
 typedef struct {
-  const struct device *const wdt;
+  const struct device* const wdt;
   int wtd_channel_id;
 } wtd_data_t;
 

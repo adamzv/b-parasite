@@ -8,7 +8,7 @@
 
 LOG_MODULE_REGISTER(sensors, CONFIG_PRSTLIB_LOG_LEVEL);
 
-int prst_sensors_read_all(prst_sensors_t *sensors) {
+int prst_sensors_read_all(prst_sensors_t* sensors) {
   int failed = 0;
   if (prst_adc_batt_read(&sensors->batt)) {
     failed |= PRST_SENSOR_BATT;

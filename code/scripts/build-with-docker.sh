@@ -12,9 +12,8 @@ else
   IMAGE="${B_PARASITE_DOCKER_IMAGE:-ghcr.io/zephyrproject-rtos/ci:v0.28.8}"
 fi
 
-# Mount code/ as /workspace inside the container — that's the west workspace
-# top dir, all the script needs.
-WORKSPACE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+# Build identity resolves source files relative to the repository root.
+WORKSPACE_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 
 echo "Running build inside docker image '$IMAGE' with workspace_dir='$WORKSPACE_DIR'…"
 
@@ -23,4 +22,4 @@ exec docker run --rm \
   -w /workspace \
   -e CMAKE_EXTRA="${CMAKE_EXTRA:-}" \
   "$IMAGE" \
-  scripts/build.sh "$@"
+  code/scripts/build.sh "$@"

@@ -1,18 +1,33 @@
 #pragma once
-#include <stdint.h>
+#include <limits.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <limits.h>
 #include <string.h>
 #define _PRST_ZB_ATTRS_H_
 #define _PRST_ZB_H_
 #define _PRST_ZB_SOIL_MOISTURE_DEFS_
 #define _PRST_ZB_SOIL_CALIBRATION_H_
-typedef uint8_t zb_uint8_t; typedef int16_t zb_int16_t; typedef uint16_t zb_uint16_t; typedef uint32_t zb_uint32_t; typedef uint8_t zb_bool_t; typedef int zb_ret_t; typedef int zb_zcl_status_t; typedef int zb_bufid_t;
+typedef uint8_t zb_uint8_t;
+typedef int16_t zb_int16_t;
+typedef uint16_t zb_uint16_t;
+typedef uint32_t zb_uint32_t;
+typedef uint8_t zb_bool_t;
+typedef int zb_ret_t;
+typedef int zb_zcl_status_t;
+typedef int zb_bufid_t;
 typedef void (*zb_callback_t)(zb_uint8_t);
-typedef struct { int16_t raw,dry,wet; zb_bool_t soil_valid; uint8_t sensor_errors; uint16_t battery_mv; uint32_t boot_count,reset_cause,uptime_sec; } prst_soil_calibration_attrs_t;
-struct zb_device_ctx { prst_soil_calibration_attrs_t soil_calibration_attrs; };
+typedef struct {
+  int16_t raw, dry, wet;
+  zb_bool_t soil_valid;
+  uint8_t sensor_errors;
+  uint16_t battery_mv;
+  uint32_t boot_count, reset_cause, uptime_sec;
+} prst_soil_calibration_attrs_t;
+struct zb_device_ctx {
+  prst_soil_calibration_attrs_t soil_calibration_attrs;
+};
 #define PRST_ZIGBEE_ENDPOINT 10
 #define PRST_ZB_ZCL_CLUSTER_ID_SOIL_CALIBRATION 0xfc00
 #define PRST_ZB_ZCL_ATTR_SOIL_CALIBRATION_RAW_ID 0
@@ -60,7 +75,10 @@ struct zb_device_ctx { prst_soil_calibration_attrs_t soil_calibration_attrs; };
 #define ZB_TRUE 1
 #define ZB_FALSE 0
 #define ZB_MILLISECONDS_TO_BEACON_INTERVAL(ms) (ms)
-#define ZB_ERROR_CHECK(x) do { if ((x)!=0) abort(); } while(0)
+#define ZB_ERROR_CHECK(x)  \
+  do {                     \
+    if ((x) != 0) abort(); \
+  } while (0)
 #define ZB_BDB_SIGNAL_STEERING 1
 #define ZB_BDB_SIGNAL_DEVICE_REBOOT 2
 #define ZB_ZDO_SIGNAL_LEAVE 3
@@ -69,15 +87,33 @@ struct zb_device_ctx { prst_soil_calibration_attrs_t soil_calibration_attrs; };
 #define ZB_BDB_SIGNAL_TC_REJOIN_DONE 6
 #define ZB_NWK_COMMAND_STATUS_PARENT_LINK_FAILURE 9
 typedef int zb_zdo_app_signal_type_t;
-typedef struct { int dummy; } zb_zdo_app_signal_hdr_t;
-typedef struct { int leave_type; } zb_zdo_signal_leave_params_t;
-typedef struct { struct { int status; } nlme_status; } zb_zdo_signal_nlme_status_indication_params_t;
-typedef struct { int cluster_id,attr_id; struct { uint16_t data16; } values; } zb_zcl_set_attr_value_param_t;
-typedef struct { int status,device_cb_id; struct { zb_zcl_set_attr_value_param_t set_attr_value_param; } cb_param; } zb_zcl_device_callback_param_t;
+typedef struct {
+  int dummy;
+} zb_zdo_app_signal_hdr_t;
+typedef struct {
+  int leave_type;
+} zb_zdo_signal_leave_params_t;
+typedef struct {
+  struct {
+    int status;
+  } nlme_status;
+} zb_zdo_signal_nlme_status_indication_params_t;
+typedef struct {
+  int cluster_id, attr_id;
+  struct {
+    uint16_t data16;
+  } values;
+} zb_zcl_set_attr_value_param_t;
+typedef struct {
+  int status, device_cb_id;
+  struct {
+    zb_zcl_set_attr_value_param_t set_attr_value_param;
+  } cb_param;
+} zb_zcl_device_callback_param_t;
 static zb_zcl_device_callback_param_t device_param;
 static zb_zdo_signal_leave_params_t leave_param;
-#define ZB_BUF_GET_PARAM(buf,type) (&device_param)
-#define ZB_ZDO_SIGNAL_GET_PARAMS(buf,type) ((type *)&leave_param)
+#define ZB_BUF_GET_PARAM(buf, type) (&device_param)
+#define ZB_ZDO_SIGNAL_GET_PARAMS(buf, type) ((type*)&leave_param)
 #define ZB_GET_APP_SIGNAL_STATUS(buf) signal_status
 #define RESET_PIN 1
 #define RESET_SOFTWARE 2
@@ -108,65 +144,125 @@ static zb_zdo_signal_leave_params_t leave_param;
 #define LOG_WRN(...)
 #define LOG_INF(...)
 #define LOG_DBG(...)
-#define __ASSERT(x,...) do { if(!(x)) abort(); }while(0)
+#define __ASSERT(x, ...) \
+  do {                   \
+    if (!(x)) abort();   \
+  } while (0)
 #define __ASSERT_NO_MSG(x) __ASSERT(x)
-#define BIT(x) (1U<<(x))
-#define MIN(a,b) ((a)<(b)?(a):(b))
-#define MAX(a,b) ((a)>(b)?(a):(b))
-#define CLAMP(x,a,b) MIN(MAX(x,a),b)
+#define BIT(x) (1U << (x))
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#define CLAMP(x, a, b) MIN(MAX(x, a), b)
 typedef int64_t k_timeout_t;
-#define K_SECONDS(x) ((int64_t)(x)*1000)
+#define K_SECONDS(x) ((int64_t)(x) * 1000)
 #define K_MSEC(x) (x)
 #define K_NO_WAIT 0
-struct k_timer { void (*expiry)(struct k_timer *); bool active; int64_t duration,period; };
-struct k_work { void (*handler)(struct k_work *); bool queued; };
-struct k_work_delayable { struct k_work work; };
-#define K_TIMER_DEFINE(name,cb,stop) struct k_timer name={.expiry=cb}
-#define K_WORK_DEFINE(name,cb) struct k_work name={.handler=cb}
-#define K_WORK_DELAYABLE_DEFINE(name,cb) struct k_work_delayable name={.work={.handler=cb}}
-static int64_t now_ms,blocked_ms;
-static bool joined=true,led_on;
-static int signal_type,signal_status,failed_sensors,poll_ms,retry_starts,retry_stops,saves;
-static int synchronous_counters,asynchronous_counters;
-static int soil_value,raw_value,valid_value,error_value,battery_value,temp_value,humidity_value,light_value;
-static void k_timer_start(struct k_timer *t,int64_t duration,int64_t period){t->active=true;t->duration=duration;t->period=period;}
-static void k_timer_stop(struct k_timer*t){t->active=false;}
-static struct k_work *submitted_work;
-static int k_work_submit(struct k_work*w){w->queued=true;submitted_work=w;return 0;}
-static int k_work_reschedule(struct k_work_delayable*w,int64_t t){(void)t;w->work.queued=true;return 0;}
-static int64_t k_uptime_get(void){return now_ms;}
-static void k_msleep(int ms){blocked_ms+=ms;}
-static void k_sleep(int64_t ms){blocked_ms+=ms;}
-static int prst_led_on(void){led_on=true;return 0;}
-static int prst_led_off(void){led_on=false;return 0;}
-static int prst_led_init(void){return 0;}
-static int prst_led_flash(int n){k_msleep(n*400);return 0;}
-static void power_down_unused_ram(void){}
-static int hwinfo_get_reset_cause(uint32_t*c){*c=RESET_POR;return 0;}
-static int hwinfo_clear_reset_cause(void){return 0;}
-static bool ZB_JOINED(void){return joined;}
-static int alarm_schedule(zb_callback_t cb,int p,int64_t delay);
-static int alarm_cancel(zb_callback_t cb,int p);
-#define ZB_SCHEDULE_APP_ALARM(cb,p,delay) alarm_schedule(cb,p,delay)
-#define ZB_SCHEDULE_APP_ALARM_CANCEL(cb,p) alarm_cancel(cb,p)
-static int zigbee_schedule_callback(zb_callback_t cb,int p){cb(p);return 0;}
-static void zb_zdo_pim_set_long_poll_interval(int ms){poll_ms=ms;}
-static void user_input_indicate(void){}
-static void zigbee_configure_sleepy_behavior(bool b){(void)b;}
-static void zigbee_enable(void){}
-static int zb_get_app_signal(int id,zb_zdo_app_signal_hdr_t**s){(void)id;(void)s;return signal_type;}
-static int zigbee_default_signal_handler(int b){(void)b;return 0;}
-static void zb_buf_free(int b){(void)b;}
-static int prst_zb_set_attr_value(uint16_t c,uint16_t a,void*v){
- if(c==1032) soil_value=*(uint16_t*)v;
- if(c==1026)temp_value=*(int16_t*)v;
- if(c==1029)humidity_value=*(uint16_t*)v;
- if(c==1024)light_value=*(uint16_t*)v;
- if(c==0xfc00){if(a==0)raw_value=*(int16_t*)v;if(a==0x10)valid_value=*(uint8_t*)v;if(a==0x11)error_value=*(uint8_t*)v;if(a==0x12)battery_value=*(uint16_t*)v;}
- return 0;
+struct k_timer {
+  void (*expiry)(struct k_timer*);
+  bool active;
+  int64_t duration, period;
+};
+struct k_work {
+  void (*handler)(struct k_work*);
+  bool queued;
+};
+struct k_work_delayable {
+  struct k_work work;
+};
+#define K_TIMER_DEFINE(name, cb, stop) struct k_timer name = {.expiry = cb}
+#define K_WORK_DEFINE(name, cb) struct k_work name = {.handler = cb}
+#define K_WORK_DELAYABLE_DEFINE(name, cb) struct k_work_delayable name = {.work = {.handler = cb}}
+static int64_t now_ms, blocked_ms;
+static bool joined = true, led_on;
+static int signal_type, signal_status, failed_sensors, poll_ms, retry_starts, retry_stops, saves;
+static int synchronous_counters, asynchronous_counters;
+static int soil_value, raw_value, valid_value, error_value, battery_value, temp_value, humidity_value, light_value;
+static void k_timer_start(struct k_timer* t, int64_t duration, int64_t period) {
+  t->active = true;
+  t->duration = duration;
+  t->period = period;
 }
-static void prst_zb_attrs_init(struct zb_device_ctx*d){memset(d,0,sizeof(*d));}
-static void prst_soil_calibration_load(prst_soil_calibration_attrs_t*c){c->dry=0;c->wet=10000;}
-static bool prst_soil_calibration_is_valid(int16_t d,int16_t w){return d<w;}
-static void prst_soil_calibration_save_async(const prst_soil_calibration_attrs_t*c){(void)c;saves++;}
-static float prst_soil_calibration_apply(const prst_soil_calibration_attrs_t*c,float v){(void)c;return v;}
+static void k_timer_stop(struct k_timer* t) { t->active = false; }
+static struct k_work* submitted_work;
+static int k_work_submit(struct k_work* w) {
+  w->queued = true;
+  submitted_work = w;
+  return 0;
+}
+static int k_work_reschedule(struct k_work_delayable* w, int64_t t) {
+  (void)t;
+  w->work.queued = true;
+  return 0;
+}
+static int64_t k_uptime_get(void) { return now_ms; }
+static void k_msleep(int ms) { blocked_ms += ms; }
+static void k_sleep(int64_t ms) { blocked_ms += ms; }
+static int prst_led_on(void) {
+  led_on = true;
+  return 0;
+}
+static int prst_led_off(void) {
+  led_on = false;
+  return 0;
+}
+static int prst_led_init(void) { return 0; }
+static int prst_led_flash(int n) {
+  k_msleep(n * 400);
+  return 0;
+}
+static void power_down_unused_ram(void) {}
+static int hwinfo_get_reset_cause(uint32_t* c) {
+  *c = RESET_POR;
+  return 0;
+}
+static int hwinfo_clear_reset_cause(void) { return 0; }
+static bool ZB_JOINED(void) { return joined; }
+static int alarm_schedule(zb_callback_t cb, int p, int64_t delay);
+static int alarm_cancel(zb_callback_t cb, int p);
+#define ZB_SCHEDULE_APP_ALARM(cb, p, delay) alarm_schedule(cb, p, delay)
+#define ZB_SCHEDULE_APP_ALARM_CANCEL(cb, p) alarm_cancel(cb, p)
+static int zigbee_schedule_callback(zb_callback_t cb, int p) {
+  cb(p);
+  return 0;
+}
+static void zb_zdo_pim_set_long_poll_interval(int ms) { poll_ms = ms; }
+static void user_input_indicate(void) {}
+static void zigbee_configure_sleepy_behavior(bool b) { (void)b; }
+static void zigbee_enable(void) {}
+static int zb_get_app_signal(int id, zb_zdo_app_signal_hdr_t** s) {
+  (void)id;
+  (void)s;
+  return signal_type;
+}
+static int zigbee_default_signal_handler(int b) {
+  (void)b;
+  return 0;
+}
+static void zb_buf_free(int b) { (void)b; }
+static int prst_zb_set_attr_value(uint16_t c, uint16_t a, void* v) {
+  if (c == 1032) soil_value = *(uint16_t*)v;
+  if (c == 1026) temp_value = *(int16_t*)v;
+  if (c == 1029) humidity_value = *(uint16_t*)v;
+  if (c == 1024) light_value = *(uint16_t*)v;
+  if (c == 0xfc00) {
+    if (a == 0) raw_value = *(int16_t*)v;
+    if (a == 0x10) valid_value = *(uint8_t*)v;
+    if (a == 0x11) error_value = *(uint8_t*)v;
+    if (a == 0x12) battery_value = *(uint16_t*)v;
+  }
+  return 0;
+}
+static void prst_zb_attrs_init(struct zb_device_ctx* d) { memset(d, 0, sizeof(*d)); }
+static void prst_soil_calibration_load(prst_soil_calibration_attrs_t* c) {
+  c->dry = 0;
+  c->wet = 10000;
+}
+static bool prst_soil_calibration_is_valid(int16_t d, int16_t w) { return d < w; }
+static void prst_soil_calibration_save_async(const prst_soil_calibration_attrs_t* c) {
+  (void)c;
+  saves++;
+}
+static float prst_soil_calibration_apply(const prst_soil_calibration_attrs_t* c, float v) {
+  (void)c;
+  return v;
+}

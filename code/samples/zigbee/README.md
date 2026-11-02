@@ -1,5 +1,6 @@
-# Zigbee firmware sample
-This sample is adapted from the [zigbee_template](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/nrf/samples/zigbee/template/README.html) from the nRF Connect SDK. It's a basic experimental/educational/exploratory firmware sample for b-parasite.
+# Zigbee firmware reference
+
+This fork builds on upstream's Zigbee sample, originally adapted from Nordic's `zigbee_template`. For installation, start with the [flashing guide](../../../docs/flashing.md). This page covers the firmware's controls and attributes.
 
 ## Clusters
 These [clusters](https://en.wikipedia.org/wiki/Zigbee#Cluster_library) are defined in the sample:
@@ -58,13 +59,13 @@ Available options in `Kconfig`; `prj.conf` sets the values used for the deployed
   up to the maximum
 
 ## Home Assistant Integration
-This firmware sample has only been tested with Home Assistant, using one of the following integrations.
+The supported setup for this fork is Zigbee2MQTT with Home Assistant discovery.
 
 ### Zigbee Home Automation (ZHA)
-With the [ZHA](https://www.home-assistant.io/integrations/zha) Home Assistant integration, b-parasite should work out of the box.
+The standard measurement clusters may work with ZHA. This fork's calibration and diagnostics have not been verified there.
 
 ### Zigbee2MQTT & Home Assistant
-With [Zigbee2MQTT](https://zigbee2mqtt.io/), a custom converter is required. Use [bparasite.mjs](bparasite.mjs) (Zigbee2MQTT 2.x, adds the 0xFC00 calibration cluster); [b-parasite.js](b-parasite.js) is the older upstream converter without calibration. See [Support new devices](https://www.zigbee2mqtt.io/advanced/support-new-devices/01_support_new_devices.html) for instructions.
+Use [bparasite.mjs](bparasite.mjs) from the same release as the firmware. It adds the 0xFC00 calibration and diagnostics cluster. [b-parasite.js](b-parasite.js) is the older upstream converter without those features. Installation steps are in the [flashing guide](../../../docs/flashing.md#install-the-converter).
 
 ## Diagnostics and invalid readings
 
@@ -72,14 +73,12 @@ The existing private cluster also reports `soil_valid`, `sensor_errors`, `batter
 
 The Basic cluster exposes a content-derived `swBuildId` (`bp-` plus a fingerprint) and build date. Keep the matching ELF with each installed image for future SWD diagnosis.
 
-A failed measurement reports an unknown value instead of retaining a valid-looking old value. Install the matching `bparasite.mjs` converter and plant-assistant updates before relying on invalid-reading handling. Existing calibration and pairing storage are preserved by an application-only update; never mass-erase for this upgrade.
+A failed measurement reports an unknown value instead of retaining a valid-looking old value. Install the matching `bparasite.mjs` converter before updating. An application-only update preserves calibration and pairing when the installed firmware uses the same storage layout; never mass-erase for this upgrade.
 
 ## Verification
 
 `bash code/tests/run.sh` runs host regressions; see `code/tests/README.md` for integration dependencies. The production build and packaged image checks complement these mocks. Real radio recovery and sleep current must be checked after flashing.
 
-## Battery Life
-While sleeping, the device consumes around 2 uA:
-![sleeping current](./media/power-profile/sleeping.png)
-In the active cycle, it averages around 125 uA for 1 second:
-![active current](media/power-profile/active.png)
+## Power measurements
+
+The `media/power-profile/` images are measurements from the upstream sample. This fork changes sampling, polling and recovery behavior, so those figures do not establish its battery life. The public build still needs a sleep-current measurement on hardware.

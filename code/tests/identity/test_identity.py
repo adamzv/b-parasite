@@ -139,10 +139,19 @@ class PackageTests(IdentityFixture):
         manifest = json.loads((self.package_dir / "manifest.json").read_text())
         self.assertEqual(manifest["identity"], self.identity)
         self.assertEqual(manifest["hex_ranges"], [[0, len(self.payload)]])
-        for name in ("app.hex", "app.bin", "app.elf"):
+        for name in ("app.hex", "app.bin", "app.elf", "bparasite.mjs", "build-identity.json", "FLASHING.md"):
             artifact = self.package_dir / name
             self.assertTrue(artifact.is_file())
             self.assertEqual(manifest["sha256"][name], hashlib.sha256(artifact.read_bytes()).hexdigest())
+        checksums = dict(line.split("  ", 1)[::-1] for line in
+                         (self.package_dir / "SHA256SUMS").read_text().splitlines())
+        self.assertEqual(set(checksums), {path.name for path in self.package_dir.iterdir()
+                                        if path.name != "SHA256SUMS"})
+        for name, digest in checksums.items():
+            self.assertEqual(digest, hashlib.sha256((self.package_dir / name).read_bytes()).hexdigest())
+        self.assertEqual(json.loads((self.package_dir / "build-identity.json").read_text()), self.identity)
+        converter = SCRIPTS.parent / "samples/zigbee/bparasite.mjs"
+        self.assertEqual((self.package_dir / "bparasite.mjs").read_bytes(), converter.read_bytes())
         instructions = (self.package_dir / "FLASHING.md").read_text()
         self.assertIn("program app.hex verify reset exit", instructions)
         self.assertIn("bparasite@2.0.0/nrf52840", instructions)

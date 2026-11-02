@@ -1,17 +1,10 @@
-# HA and converter regression tests
-
-Tests import the real `assess.py` and external converter. Python needs `websocket-client`; Node needs the
-real `zigbee-herdsman-converters` and `zigbee-herdsman` packages used by Zigbee2MQTT. The converter is copied
-into a temporary directory beside those dependencies; production source and dependencies stay unchanged.
+# Zigbee2MQTT converter tests
 
 ```sh
-BPARASITE_TEST_PYTHON=/path/to/venv/bin/python \
-ZIGBEE_TEST_NODE_MODULES=/path/to/zigbee2mqtt/node_modules \
+npm ci
 sh code/tests/integration/run.sh
 ```
 
-Validated with Python 3.14, websocket-client 1.9.2 and zigbee-herdsman-converters 26.76.0.
-The tests cover invalid measurements clearing cached state, diagnostic units/reads/reporting,
-unsupported old-firmware attributes, visible configuration failures, calibration writes, and assessments
-that suppress historical soil and previous watering notes while the current soil sensor is invalid.
-Network/radio calls are replaced at the endpoint boundary; no hardware or HA server is contacted.
+These tests load the real converter and the pinned Zigbee2MQTT libraries. They cover unknown measurements, diagnostic units and wire IDs, reporting configuration, calibration writes and compatibility with devices that lack the new attributes.
+
+Endpoint calls are controlled by the tests; no coordinator, MQTT broker or Home Assistant server is contacted. Set `ZIGBEE_TEST_NODE_MODULES` to an absolute dependency directory to check another installed version.

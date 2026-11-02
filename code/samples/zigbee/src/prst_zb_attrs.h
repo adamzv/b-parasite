@@ -53,8 +53,8 @@ struct zb_device_ctx {
   prst_soil_calibration_attrs_t soil_calibration_attrs;
 };
 
-void prst_zb_attrs_init(struct zb_device_ctx *dev_ctx);
+void prst_zb_attrs_init(struct zb_device_ctx* dev_ctx);
 
-zb_zcl_status_t prst_zb_set_attr_value(zb_uint16_t cluster_id, zb_uint16_t attr_id, void *data);
+zb_zcl_status_t prst_zb_set_attr_value(zb_uint16_t cluster_id, zb_uint16_t attr_id, void* data);
 
 #endif  // _PRST_ZB_ATTRS_H_

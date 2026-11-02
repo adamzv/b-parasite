@@ -1,9 +1,8 @@
 #include "debug_counters.h"
 
 #include <errno.h>
-#include <string.h>
-
 #include <prstlib/macros.h>
+#include <string.h>
 #include <zephyr/fs/fs.h>
 #include <zephyr/fs/littlefs.h>
 #include <zephyr/kernel.h>

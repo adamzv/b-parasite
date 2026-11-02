@@ -1,13 +1,9 @@
 {
-	"name": "nrf-connect:v2.7",
-	"image": "nordicplayground/nrfconnect-sdk:v2.7-branch",
-	"features": {
-	},
-	"customizations": {
-		"vscode": {
-			"extensions": [
-				"nordic-semiconductor.nrf-connect"
-			]
-		}
-	}
+  "name": "b-parasite (Zephyr SDK 0.17.4)",
+  "image": "ghcr.io/zephyrproject-rtos/ci:v0.28.8",
+  "customizations": {
+    "vscode": {
+      "extensions": ["nordic-semiconductor.nrf-connect"]
+    }
+  }
 }

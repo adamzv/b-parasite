@@ -6,6 +6,6 @@
 int prst_ble_init();
 int prst_ble_adv_start();
 int prst_ble_adv_stop();
-int prst_ble_adv_set_data(const prst_sensors_t *sensors);
+int prst_ble_adv_set_data(const prst_sensors_t* sensors);
 
 #endif  // _PRST_BLE_BLE_H_

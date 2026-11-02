@@ -36,7 +36,7 @@ static void dump_config() {
   LOG_INF("Sleep duration: %d ms", CONFIG_PRST_SLEEP_DURATION_MSEC);
 }
 
-static int prst_loop(prst_sensors_t *sensors) {
+static int prst_loop(prst_sensors_t* sensors) {
   RET_IF_ERR(prst_sensors_read_all(sensors));
   RET_IF_ERR(prst_ble_adv_set_data(sensors));
   RET_IF_ERR(prst_ble_adv_start());

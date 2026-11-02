@@ -55,18 +55,21 @@ else
 fi
 
 if [ ! -d .west ]; then
-  echo "Initializing west workspace and installing Python dependencies…"
+  echo "Initializing west workspace…"
   west init -l prstlib
   west update --narrow --fetch-opt=--depth=1
-  pip install \
-    -r zephyr/scripts/requirements.txt \
-    -r nrf/scripts/requirements.txt
 else
-  echo "West workspace already initialized, skipping west init/update and Python dependencies installation"
+  echo "West workspace already initialized, skipping west init/update"
 fi
 
-west build --pristine \
+# Docker containers are disposable even when the west workspace is reused.
+pip install \
+  -r zephyr/scripts/requirements.txt \
+  -r nrf/scripts/requirements.txt
+
+west build --pristine --sysbuild \
   --build-dir "samples/$SAMPLE/build_${SOC}_${REV}" \
   --board "bparasite@${REV}/${SOC}" \
   "samples/$SAMPLE" -- \
+  -DZEPHYR_EXTRA_MODULES="$WORKSPACE_DIR/prstlib" \
   $CMAKE_EXTRA

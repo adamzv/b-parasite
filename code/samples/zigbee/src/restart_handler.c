@@ -13,8 +13,8 @@ static uint32_t restart_timeout_sec = CONFIG_PRST_ZB_RESTART_WATCHDOG_TIMEOUT_SE
 static bool recovery_active;
 static int64_t next_retry_ms;
 
-static void callback_work_handler(struct k_work *work);
-static void restart_network_steering_cb(struct k_timer *timer);
+static void callback_work_handler(struct k_work* work);
+static void restart_network_steering_cb(struct k_timer* timer);
 
 K_MUTEX_DEFINE(recovery_lock);
 K_WORK_DEFINE(callback_work, callback_work_handler);
@@ -25,7 +25,7 @@ static void schedule_retry(void) {
   k_timer_start(&restart_timer, K_SECONDS(restart_timeout_sec), K_MSEC(0));
 }
 
-static void callback_work_handler(struct k_work *work) {
+static void callback_work_handler(struct k_work* work) {
   ARG_UNUSED(work);
   k_mutex_lock(&recovery_lock, K_FOREVER);
   // A stopped cycle can leave a callback queued after a newer cycle starts.
@@ -41,7 +41,7 @@ static void callback_work_handler(struct k_work *work) {
   k_mutex_unlock(&recovery_lock);
 }
 
-static void restart_network_steering_cb(struct k_timer *timer) {
+static void restart_network_steering_cb(struct k_timer* timer) {
   ARG_UNUSED(timer);
   k_work_submit(&callback_work);
 }

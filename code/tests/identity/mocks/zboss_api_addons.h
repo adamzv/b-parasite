@@ -13,8 +13,12 @@ struct zb_device_ctx {
     uint8_t zcl_version, power_source, hw_version;
     uint8_t mf_name[33], model_id[33], date_code[17], sw_ver[17];
   } basic_attr;
-  struct { uint8_t quantity, size; } batt_attrs;
-  struct { uint16_t identify_time; } identify_attr;
+  struct {
+    uint8_t quantity, size;
+  } batt_attrs;
+  struct {
+    uint16_t identify_time;
+  } identify_attr;
 };
 #define ZB_ZCL_VERSION 3
 #define ZB_ZCL_BASIC_POWER_SOURCE_BATTERY 3
@@ -31,8 +35,8 @@ struct zb_device_ctx {
 #define ZB_ZCL_SET_STRING_VAL(destination, value, size) \
   (memcpy((destination) + 1, (value), (size)), (destination)[0] = (size))
 
-void prst_zb_attrs_init(struct zb_device_ctx *dev_ctx);
+void prst_zb_attrs_init(struct zb_device_ctx* dev_ctx);
 zb_zcl_status_t zb_zcl_set_attr_val(uint8_t endpoint, uint16_t cluster,
-                                 uint8_t role, uint16_t attribute,
-                                 uint8_t *data, uint8_t check_access);
+                                    uint8_t role, uint16_t attribute,
+                                    uint8_t* data, uint8_t check_access);
 #endif

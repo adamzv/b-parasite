@@ -94,15 +94,11 @@ def package(build, output):
     if output.exists() and any(output.iterdir()):
         raise ValueError("output directory must be empty")
     output.mkdir(parents=True, exist_ok=True)
-    artifacts = {"app.hex": merged_hex, "app.bin": binary, "app.elf": elf}
-    hashes = {}
+    converter = Path(__file__).resolve().parents[1] / "samples/zigbee/bparasite.mjs"
+    artifacts = {"app.hex": merged_hex, "app.bin": binary, "app.elf": elf,
+                 "bparasite.mjs": converter, "build-identity.json": identity_path}
     for name, source in artifacts.items():
         shutil.copyfile(source, output / name)
-        hashes[name] = sha256((output / name).read_bytes())
-    manifest = {"identity": identity, "sha256": hashes, "hex_ranges": ranges,
-                "protected_start": PROTECTED_START}
-    (output / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
-    (output / "SHA256SUMS").write_text("".join(f"{digest}  {name}\n" for name, digest in hashes.items()))
     (output / "FLASHING.md").write_text(f"""# b-parasite application update
 
 Target: **{KNOWN_BOARD}** only. Build ID: **{firmware_id}**.
@@ -129,7 +125,24 @@ After reset, confirm new sensor reports, calibration values and network recovery
 Read Zigbee Basic cluster `swBuildId` ({firmware_id}) and `dateCode`
 ({identity['date_code']}) to identify the firmware. Hardware operation and
 recovery are not established by package validation.
+
+Install the included `bparasite.mjs` as a Zigbee2MQTT external converter before
+updating. After updating, press SW1 four times and reconfigure the device in
+Zigbee2MQTT during its 15-minute service window. Keep the original calibration
+values and check that they are unchanged afterward.
+
+These storage addresses apply to this fork's partition layout. When migrating
+from another firmware, compare its layout first; preserving these sectors does
+not migrate data stored at different addresses. For a first flash from BLE or a
+blank board, follow the full guide:
+https://github.com/adamzv/b-parasite/blob/main/docs/flashing.md
 """)
+    hashes = {path.name: sha256(path.read_bytes()) for path in sorted(output.iterdir())}
+    manifest = {"identity": identity, "sha256": hashes, "hex_ranges": ranges,
+                "protected_start": PROTECTED_START}
+    (output / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
+    hashes = {**hashes, "manifest.json": sha256((output / "manifest.json").read_bytes())}
+    (output / "SHA256SUMS").write_text("".join(f"{digest}  {name}\n" for name, digest in sorted(hashes.items())))
     return manifest
 
 

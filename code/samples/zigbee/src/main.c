@@ -36,7 +36,7 @@ static prst_sensors_t sensors;
 // A board that has measured and reported for this long is past any boot-time fault.
 #define PRST_ZB_STABLE_UPTIME_MS (10 * 60 * 1000)
 
-static void led_blink_end_cb(struct k_timer *timer) {
+static void led_blink_end_cb(struct k_timer* timer) {
   prst_led_off();
 }
 
@@ -45,7 +45,7 @@ K_TIMER_DEFINE(led_blink_end_timer, led_blink_end_cb, /*stop_fn=*/NULL);
 static int led_flashing_left;
 
 // A short blink per period instead of a 50% toggle: the LED draws more than the sleeping radio.
-static void led_flashing_cb(struct k_timer *timer) {
+static void led_flashing_cb(struct k_timer* timer) {
   if (led_flashing_left-- <= 0) {
     k_timer_stop(timer);
     return;
@@ -187,7 +187,7 @@ static void led_blink_once(void) {
 static void end_calibration_mode(void);
 static void calibration_timeout_cb(zb_uint8_t arg);
 
-static zb_int16_t median(zb_int16_t *values, int n) {
+static zb_int16_t median(zb_int16_t* values, int n) {
   for (int i = 1; i < n; i++) {
     const zb_int16_t v = values[i];
     int j = i - 1;
@@ -321,8 +321,8 @@ void update_sensors_cb(zb_uint8_t arg) {
   {
     // Illuminance in 10000 * log_10(lux) + 1; ZCL reserves 0 for "too low to measure".
     zb_uint16_t log_lux =
-        (failed & PRST_SENSOR_PHOTO) ? UINT16_MAX :
-        sensors.photo.brightness ? 10000 * log10((float)sensors.photo.brightness) + 1 : 0;
+        (failed & PRST_SENSOR_PHOTO) ? UINT16_MAX : sensors.photo.brightness ? 10000 * log10((float)sensors.photo.brightness) + 1
+                                                                             : 0;
     prst_zb_set_attr_value(ZB_ZCL_CLUSTER_ID_ILLUMINANCE_MEASUREMENT,
                            ZB_ZCL_ATTR_ILLUMINANCE_MEASUREMENT_MEASURED_VALUE_ID,
                            &log_lux);
@@ -381,18 +381,18 @@ static void enter_long_poll(zb_uint8_t arg) {
 // Interview, service and button receive windows may overlap; the longest one wins.
 static void enter_interview_poll(void) {
   receive_window_end_ms = MAX(receive_window_end_ms,
-      k_uptime_get() + 1000LL * CONFIG_PRST_ZB_INTERVIEW_DURATION_SEC);
+                              k_uptime_get() + 1000LL * CONFIG_PRST_ZB_INTERVIEW_DURATION_SEC);
   enter_long_poll(/*arg=*/0);
 }
 
 static void zcl_device_cb(zb_bufid_t bufid) {
-  zb_zcl_device_callback_param_t *param =
+  zb_zcl_device_callback_param_t* param =
       ZB_BUF_GET_PARAM(bufid, zb_zcl_device_callback_param_t);
   param->status = RET_OK;
   if (param->device_cb_id != ZB_ZCL_SET_ATTR_VALUE_CB_ID) {
     return;
   }
-  const zb_zcl_set_attr_value_param_t *set = &param->cb_param.set_attr_value_param;
+  const zb_zcl_set_attr_value_param_t* set = &param->cb_param.set_attr_value_param;
   if (set->cluster_id != PRST_ZB_ZCL_CLUSTER_ID_SOIL_CALIBRATION) {
     return;
   }
@@ -433,14 +433,15 @@ static void start_calibration_mode(zb_uint8_t presses) {
   user_input_indicate();
   if (presses == 1) {
     receive_window_end_ms = MAX(receive_window_end_ms,
-        k_uptime_get() + 1000LL * CONFIG_PRST_ZB_BUTTON_POLL_DURATION_SEC);
+                                k_uptime_get() + 1000LL * CONFIG_PRST_ZB_BUTTON_POLL_DURATION_SEC);
     enter_long_poll(/*arg=*/0);
     reschedule_sensor_update_now();
     return;
   }
 
   calibration_mode_end_ms = k_uptime_get() + 1000LL * CONFIG_PRST_ZB_CALIBRATION_DURATION_SEC;
-  capture_target = presses == 2 ? CAPTURE_DRY : presses == 3 ? CAPTURE_WET : CAPTURE_NONE;
+  capture_target = presses == 2 ? CAPTURE_DRY : presses == 3 ? CAPTURE_WET
+                                                             : CAPTURE_NONE;
   enter_long_poll(/*arg=*/0);
   ZB_ERROR_CHECK(ZB_SCHEDULE_APP_ALARM(
       calibration_timeout_cb, /*param=*/0,
@@ -459,7 +460,7 @@ static void start_calibration_mode(zb_uint8_t presses) {
 
 static int button_presses;
 
-static void button_sequence_end_handler(struct k_work *work) {
+static void button_sequence_end_handler(struct k_work* work) {
   const int presses = MIN(button_presses, 4);
   button_presses = 0;
   // Button callbacks run on the system workqueue; ZBOSS state may only be touched from its thread.
@@ -479,11 +480,11 @@ static void button_cb(prst_button_t button, bool is_active) {
 
 void zboss_signal_handler(zb_bufid_t bufid) {
   // See zigbee_default_signal_handler() for all available signals.
-  zb_zdo_app_signal_hdr_t *sig_hndler = NULL;
+  zb_zdo_app_signal_hdr_t* sig_hndler = NULL;
   zb_zdo_app_signal_type_t sig = zb_get_app_signal(bufid, /*sg_p=*/&sig_hndler);
   zb_ret_t status = ZB_GET_APP_SIGNAL_STATUS(bufid);
   switch (sig) {
-    case ZB_BDB_SIGNAL_STEERING:         // New network.
+    case ZB_BDB_SIGNAL_STEERING:  // New network.
     case ZB_BDB_SIGNAL_DEVICE_REBOOT:
     case ZB_BDB_SIGNAL_TC_REJOIN_DONE: {  // Previously joined network.
       LOG_DBG("Steering complete. Status: %d", status);
@@ -507,8 +508,9 @@ void zboss_signal_handler(zb_bufid_t bufid) {
       if (status == RET_OK) {
         led_searching_start();
         LOG_DBG("Network left (leave type: %d)",
-                ((zb_zdo_signal_leave_params_t *)ZB_ZDO_SIGNAL_GET_PARAMS(
-                    sig_hndler, zb_zdo_signal_leave_params_t))->leave_type);
+                ((zb_zdo_signal_leave_params_t*)ZB_ZDO_SIGNAL_GET_PARAMS(
+                     sig_hndler, zb_zdo_signal_leave_params_t))
+                    ->leave_type);
         // The default handler rejoins for CONFIG_ZIGBEE_DEV_REJOIN_TIMEOUT_MS and then waits for user input
         // forever; the restart watchdog is what brings an unattended board back.
         prst_restart_watchdog_start();
@@ -528,7 +530,7 @@ void zboss_signal_handler(zb_bufid_t bufid) {
       break;
     }
     case ZB_NLME_STATUS_INDICATION: {
-      zb_zdo_signal_nlme_status_indication_params_t *nlme_status_ind =
+      zb_zdo_signal_nlme_status_indication_params_t* nlme_status_ind =
           ZB_ZDO_SIGNAL_GET_PARAMS(sig_hndler, zb_zdo_signal_nlme_status_indication_params_t);
       if (nlme_status_ind->nlme_status.status == ZB_NWK_COMMAND_STATUS_PARENT_LINK_FAILURE) {
         // Not zb_reset(), Nordic's workaround for KRKNWK-12017 (NCS 1.8-2.3): it reboots on every parent link
@@ -546,13 +548,13 @@ void zboss_signal_handler(zb_bufid_t bufid) {
   }
 }
 
-void dump_counter(const char *counter_name, prst_debug_counter_t value) {
+void dump_counter(const char* counter_name, prst_debug_counter_t value) {
   LOG_INF("- %s: %d", counter_name, value);
 }
 
-int log_reset_reason_counter(uint32_t *cause_out) {
+int log_reset_reason_counter(uint32_t* cause_out) {
   uint32_t cause;
-  const char *reset_counter_str = "reset_cause_unknown";
+  const char* reset_counter_str = "reset_cause_unknown";
   RET_IF_ERR(hwinfo_get_reset_cause(&cause));
   RET_IF_ERR(hwinfo_clear_reset_cause());
   *cause_out = cause;

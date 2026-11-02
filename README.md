@@ -1,61 +1,69 @@
-[![b-parasite firmware build](https://github.com/rbaron/b-parasite/actions/workflows/b-parasite.yml/badge.svg?branch=main)](https://github.com/rbaron/b-parasite/actions/workflows/b-parasite.yml)
+# b-parasite — Zigbee firmware
 
-# b-parasite
-<p align="center">
-  <img src="img/resized/b-parasite-2.0.0.jpg" width="512px" border="0" alt="PCB front and back photo" />
-</p>
+[![Firmware checks](https://github.com/adamzv/b-parasite/actions/workflows/b-parasite.yml/badge.svg)](https://github.com/adamzv/b-parasite/actions/workflows/b-parasite.yml)
 
-b-parasite is an open source soil moisture and ambient temperature/humidity/light sensor.
+This is my Zigbee-focused fork of [rbaron/b-parasite](https://github.com/rbaron/b-parasite), an open source soil moisture, temperature, humidity and light sensor. The hardware is Raphael Baron's work. This fork adds the firmware changes I use with Zigbee2MQTT and Home Assistant.
 
-# Features
-* Capacitive Soil moisture sensor - see [this blog post](https://rbaron.net/blog/2021/04/05/How-capacitive-soil-moisture-sensors-work.html), [this Twitter thread](https://twitter.com/rbaron_/status/1367182806368071685), and [this post](https://wemakethings.net/2012/09/26/capacitance_measurement/) for nice resources on how they work
-* Air temperature and humidity sensor using a [Sensirion's SHTC3](https://sensirion.com/media/documents/643F9C8E/63A5A436/Datasheet_SHTC3.pdf)
-* Light sensor using an [ALS-PT19](https://en.everlight.com/wp-content/plugins/ItemRelationship/product_files/pdf/ALS-PT19-315C-L177-TR8_V8.pdf) phototransistor
-* Powered by a common CR2032 coin cell, potentially for over two years
-* Support for [nRF52840](https://www.nordicsemi.com/products/nrf52840) and [nRF52833](https://www.nordicsemi.com/products/nrf52833) modules
-* Open hardware and open source design
+Most of the work is about living with the sensors: calibrating them in their pots, getting useful information when something goes wrong, and recovering after the coordinator disappears.
 
-# Software
-This repository also hosts a few different firmware samples for b-parasite.
+<img src="img/resized/b-parasite-2.0.0.jpg" width="512" alt="Front and back of a b-parasite board">
 
-|Sample|Description|Extra Documentation|
-|---|---|---|
-|[samples/ble](./code/samples/ble)|This is the most battle-tested and useful firmware. It periodically reads all sensors and broadcast them via Bluetooth Low Energy (BLE). It works with [Home Assistant](https://www.home-assistant.io/) + [BTHome](https://bthome.io/) out of the box. |[Docs](./code/samples/ble/README.md)|
-|[samples/zigbee](./code/samples/zigbee)| An experimental/educational/exploratory basic Zigbee sample built on [nRF Connect + ZBOSS](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/nrf/ug_zigbee.html). It integrates with [Home Assistant](https://www.home-assistant.io/) via [ZHA](https://www.home-assistant.io/integrations/zha) or [Zigbee2MQTT](https://www.zigbee2mqtt.io/). |[Docs](./code/samples/zigbee/README.md)|
-|[samples/blinky](./code/samples/blinky)| The classic "Hello, world" |-|
-|[samples/soil-read-loop](./code/samples/soil-read-loop)| Reads the soil moisture sensor on a loop. Useful for experimenting and calibrating the sensor. |-|
-|[samples/input](./code/samples/input)| Handles button presses. Useful for power profiling GPIO interrupts and testing debouncing for push switches on [boards that have them](https://github.com/rbaron/b-parasite/wiki/Hardware-Versions). |-|
+## What changed
 
-# Documentation
-Information about how to order, assemble, build the samples, protect the sensor and flash the firmware is on [the Wiki](https://github.com/rbaron/b-parasite/wiki).
+- **Calibration on the board.** Set dry and wet points with SW1 or Zigbee2MQTT. The board saves them across restarts.
+- **More useful diagnostics.** Exact battery voltage in mV, sensor errors, soil validity, boot count, reset cause, uptime and a build ID.
+- **Recovery after network trouble.** Failed joins keep retrying with a capped backoff. Repeated error signals don't keep pushing the next attempt away.
+- **Sensor failure handling.** Measurement circuits are shut down after errors, and failed readings reach Zigbee2MQTT as unknown instead of looking like fresh data.
+- **Less time awake during normal use.** Logging is off, readings are ten minutes apart, and one button press opens a short receive window. A longer service mode is available when needed.
 
-# Repository Organization
-* [code/](./code/) - A [`west workspace`](https://docs.zephyrproject.org/latest/develop/west/workspaces.html) containing the common `prstlib` module library and samples, built with Nordic's [nRF Connect SDK](https://www.nordicsemi.com/Products/Development-software/nrf-connect-sdk).
-* [kicad/](./kicad/) - KiCad schematic, layout and fabrication files for the printed circuit board (PCB)
-* [data/](data/) - data for testing and sensor calibration
-* [bridge/](bridge/) - an [ESPHome](https://github.com/esphome/esphome)-based BLE-MQTT bridge
-* [case/](case/) - a 3D printable case
+## Flash it
 
-<p align="center">
-  <img src="img/resized/img2.jpg" border="0" alt="b-parasite stuck into a small plant vase" />
-</p>
+The release target is **b-parasite rev 2.0.0 with an nRF52840**. Check the marking on your module before choosing an image.
 
-# Case
-<p align="center">
-  <img src="img/case/screenshot.png" alt="Render of the original 3D printable case" />
-</p>
+1. Download the firmware bundle from [Releases](https://github.com/adamzv/b-parasite/releases).
+2. Install its `bparasite.mjs` converter in Zigbee2MQTT.
+3. Back up the board, verify the bundle's checksums, and flash `app.hex` over SWD.
+4. Pair it, or reconfigure the existing device if you're updating this firmware.
 
-We have three different 3D-printable cases:
-1. Original snap-on case - [case/Top.stl](./case/Top.stl), [case/Bottom.stl](./case/Bottom.stl)
-2. High airflow - [case/b_parasite_case_high_airflow.stl](./case/b_parasite_case_high_airflow.stl)
-3. Mushroom-style - available on [Printables](https://www.printables.com/model/456571-mushroomcap-for-b-parasite-soil-moisture-sensor)
-4. b-parasite Hat - available on [Printables](https://www.printables.com/model/901220-waterproof-case-for-b-parasite-soil-moisture-air-s)
+The [flashing guide](docs/flashing.md) covers wiring, first installation and updates. You need an SWD probe; these releases don't provide Zigbee OTA updates.
 
-# Accessories
+## The button
 
-Designs and hardware to help you, when building your own:
-1. Desk holder for b-parasites [Printables](https://www.printables.com/de/model/566974-b-parasite-holder)
+| SW1 | What it does |
+| --- | --- |
+| One press | Take a reading and listen for commands for 60 seconds |
+| Two presses | Capture the dry calibration point |
+| Three presses | Capture the wet calibration point |
+| Four or more presses | Open a 15-minute service window for setup or calibration writes |
+| Hold while powering up, then keep holding for 5 seconds | Forget the Zigbee network and pair again |
 
-# License
-The hardware and associated design files are released under the [Creative Commons CC BY-SA 4.0 license](https://creativecommons.org/licenses/by-sa/4.0/).
-The code is released under the [MIT license](https://opensource.org/licenses/MIT).
+For calibration, leave the probe in its intended position in the pot. Capture the dry point when the soil is as dry as you want it to get, and the wet point after watering. The firmware waits for settling and takes a median; an invalid dry/wet pair is rejected. See the [Zigbee reference](code/samples/zigbee/README.md) for the details and LED signals.
+
+## Home Assistant
+
+Use **Zigbee2MQTT with the included external converter** for calibration and diagnostics. Enable Home Assistant discovery in Zigbee2MQTT and the entities appear there.
+
+ZHA's standard measurements may work, but this fork's calibration and diagnostic features haven't been verified with ZHA. The plant-assistant used in my own setup is separate; the sensor doesn't need it.
+
+## Building and testing
+
+```sh
+npm ci
+npm test
+
+bash code/scripts/build-with-docker.sh zigbee nrf52840 2.0.0
+```
+
+The build uses a pinned Zigbee add-on revision and nRF Connect SDK. The [build guide](docs/building.md) covers local toolchains, configuration and release packaging.
+
+Earlier firmware from this work was flashed on two rev 2.0.0/nRF52840 boards, with calibration preserved and reports checked through Zigbee2MQTT and Home Assistant. The public build enables all Zigbee channels. Its current draw and recovery after a real coordinator outage still need hardware checks; host tests can't establish either.
+
+## Upstream and hardware
+
+The PCB designs, cases, BLE firmware and other samples are kept here from upstream. This fork's releases focus on the Zigbee target above; the other board and sample combinations aren't part of its release checks.
+
+For ordering, assembly, hardware revisions and the original project documentation, use the [upstream wiki](https://github.com/rbaron/b-parasite/wiki) and [original README](README.upstream.md).
+
+If you find a problem, include the board revision, module, Zigbee2MQTT version and Basic cluster `swBuildId` in an [issue](https://github.com/adamzv/b-parasite/issues). A description of what happened before the failure helps more than a screenshot of an unavailable entity.
+
+Code is [MIT licensed](LICENSE). Hardware and design files retain upstream's [CC BY-SA 4.0 license](https://creativecommons.org/licenses/by-sa/4.0/).

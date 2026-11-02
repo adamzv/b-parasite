@@ -1,8 +1,8 @@
 #ifndef _PRST_ZB_H_
 #define _PRST_ZB_H_
 
-#include "prst_zb_soil_moisture_defs.h"
 #include "prst_zb_soil_calibration.h"
+#include "prst_zb_soil_moisture_defs.h"
 
 #define PRST_ZIGBEE_ENDPOINT 10
 #define PRST_BASIC_MANUF_NAME "b-parasite"
@@ -108,7 +108,7 @@
   ZB_AF_DECLARE_ENDPOINT_DESC(ep_name, ep_id, ZB_AF_HA_PROFILE_ID,                                  \
                               /*reserved_length=*/0, /*reserved_ptr=*/NULL,                         \
                               ZB_ZCL_ARRAY_SIZE(cluster_list, zb_zcl_cluster_desc_t), cluster_list, \
-                              (zb_af_simple_desc_1_1_t *)&simple_desc_##ep_name,                    \
+                              (zb_af_simple_desc_1_1_t*)&simple_desc_##ep_name,                     \
                               PRST_ZB_ATTR_REPORTING_COUNT, reporting_ctx_##ep_name,                \
                               /*lev_ctrl_count=*/0, /*lev_ctrl_ctx=*/NULL)
 

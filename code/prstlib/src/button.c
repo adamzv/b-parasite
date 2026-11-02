@@ -26,7 +26,7 @@ static void maybe_call_user_callback(prst_button_t button, bool is_active) {
   }
 }
 
-static void button_pressed_cb(struct k_work *work) {
+static void button_pressed_cb(struct k_work* work) {
   int button_state = prst_button_poll(PRST_BUTTON_SW1);
   if (button_state < 0) {
     LOG_ERR("Failed to poll button");
@@ -35,7 +35,7 @@ static void button_pressed_cb(struct k_work *work) {
   return maybe_call_user_callback(PRST_BUTTON_SW1, button_state);
 }
 
-static void button_pressed_isr(const struct device *dev, struct gpio_callback *cb,
+static void button_pressed_isr(const struct device* dev, struct gpio_callback* cb,
                                uint32_t pins) {
   k_work_reschedule(&button_pressed_delayable, K_MSEC(10));
 }

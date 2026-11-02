@@ -3,13 +3,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include <zephyr/kernel.h>
+
 #include "restart_handler.h"
 
 static int64_t now_ms;
-static struct k_timer *scheduled_timer;
-static struct k_work *queued_work;
+static struct k_timer* scheduled_timer;
+static struct k_work* queued_work;
 static unsigned retry_requests;
 static unsigned sdk_rejoin_starts;
 static bool sdk_waiting_for_input;
@@ -23,16 +23,17 @@ static bool stop_waiting_for_mutex;
 static atomic_bool stop_returned;
 static _Thread_local bool stopping_thread;
 
-#define CHECK(condition) do { \
-  if (!(condition)) { \
-    fprintf(stderr, "FAIL %s:%d: %s\n", __func__, __LINE__, #condition); \
-    exit(1); \
-  } \
-} while (0)
+#define CHECK(condition)                                                   \
+  do {                                                                     \
+    if (!(condition)) {                                                    \
+      fprintf(stderr, "FAIL %s:%d: %s\n", __func__, __LINE__, #condition); \
+      exit(1);                                                             \
+    }                                                                      \
+  } while (0)
 
 int64_t k_uptime_get(void) { return now_ms; }
 
-int k_mutex_lock(struct k_mutex *mutex, k_timeout_t timeout) {
+int k_mutex_lock(struct k_mutex* mutex, k_timeout_t timeout) {
   CHECK(timeout == K_FOREVER);
   CHECK(!in_timer_callback);
   if (stopping_thread) {
@@ -44,11 +45,11 @@ int k_mutex_lock(struct k_mutex *mutex, k_timeout_t timeout) {
   return pthread_mutex_lock(&mutex->native);
 }
 
-int k_mutex_unlock(struct k_mutex *mutex) {
+int k_mutex_unlock(struct k_mutex* mutex) {
   return pthread_mutex_unlock(&mutex->native);
 }
 
-void k_timer_start(struct k_timer *timer, k_timeout_t duration, k_timeout_t period) {
+void k_timer_start(struct k_timer* timer, k_timeout_t duration, k_timeout_t period) {
   CHECK(duration > 0);
   CHECK(period == 0);
   scheduled_timer = timer;
@@ -56,20 +57,20 @@ void k_timer_start(struct k_timer *timer, k_timeout_t duration, k_timeout_t peri
   timer->armed = true;
 }
 
-void k_timer_stop(struct k_timer *timer) { timer->armed = false; }
+void k_timer_stop(struct k_timer* timer) { timer->armed = false; }
 
-int k_work_submit(struct k_work *work) {
+int k_work_submit(struct k_work* work) {
   queued_work = work;
   work->pending = true;
   return 1;
 }
 
-int k_work_cancel(struct k_work *work) {
+int k_work_cancel(struct k_work* work) {
   work->pending = false;
   return 0;
 }
 
-int prst_debug_counters_increment(const char *name) {
+int prst_debug_counters_increment(const char* name) {
   CHECK(strcmp(name, "steering_watchdog_restart") == 0);
   CHECK(!in_timer_callback);
   return 0;
@@ -154,7 +155,7 @@ static void test_backoff_is_capped(void) {
 static void test_success_discards_pending_work(void) {
   prst_restart_watchdog_start();
   expire_timer();
-  struct k_work *stale_work = queued_work;
+  struct k_work* stale_work = queued_work;
   prst_restart_watchdog_stop();
   stale_work->handler(stale_work);
   CHECK(retry_requests == 0);
@@ -174,7 +175,7 @@ static void test_restart_resets_backoff_and_rejects_stale_work(void) {
   prst_restart_watchdog_start();
   retry_at(600000);
   expire_timer();
-  struct k_work *stale_work = queued_work;
+  struct k_work* stale_work = queued_work;
   prst_restart_watchdog_stop();
   now_ms = 2000000;
   prst_restart_watchdog_start();
@@ -186,13 +187,13 @@ static void test_restart_resets_backoff_and_rejects_stale_work(void) {
   CHECK(scheduled_timer->deadline == 3800000);
 }
 
-static void *work_thread(void *unused) {
+static void* work_thread(void* unused) {
   (void)unused;
   run_work();
   return NULL;
 }
 
-static void *stop_thread(void *unused) {
+static void* stop_thread(void* unused) {
   (void)unused;
   stopping_thread = true;
   prst_restart_watchdog_stop();
@@ -231,19 +232,19 @@ static void test_stop_serializes_with_running_retry(void) {
   CHECK(retry_requests == 1);
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   CHECK(argc == 2);
   struct {
-    const char *name;
+    const char* name;
     void (*run)(void);
   } tests[] = {
-    {"duplicate_start", test_duplicate_start_keeps_first_deadline},
-    {"noop_and_failure", test_noop_then_failed_rejoins_keep_retrying},
-    {"capped_backoff", test_backoff_is_capped},
-    {"pending_success", test_success_discards_pending_work},
-    {"late_timer", test_late_timer_after_success_cannot_retry},
-    {"restart_after_stop", test_restart_resets_backoff_and_rejects_stale_work},
-    {"running_stop_race", test_stop_serializes_with_running_retry},
+      {"duplicate_start", test_duplicate_start_keeps_first_deadline},
+      {"noop_and_failure", test_noop_then_failed_rejoins_keep_retrying},
+      {"capped_backoff", test_backoff_is_capped},
+      {"pending_success", test_success_discards_pending_work},
+      {"late_timer", test_late_timer_after_success_cannot_retry},
+      {"restart_after_stop", test_restart_resets_backoff_and_rejects_stale_work},
+      {"running_stop_race", test_stop_serializes_with_running_retry},
   };
   for (size_t i = 0; i < sizeof(tests) / sizeof(tests[0]); ++i) {
     if (strcmp(argv[1], tests[i].name) != 0) continue;

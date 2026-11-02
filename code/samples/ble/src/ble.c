@@ -19,7 +19,7 @@ static const struct bt_data ad[] = {
 
 static bt_addr_le_t mac_addr;
 
-static int set_user_defined_bt_addr(const char *addr_str) {
+static int set_user_defined_bt_addr(const char* addr_str) {
   bt_addr_le_t addr;
   RET_IF_ERR(bt_addr_le_from_str(addr_str, "random", &addr));
   RET_IF_ERR(bt_id_create(&addr, NULL));
@@ -27,10 +27,10 @@ static int set_user_defined_bt_addr(const char *addr_str) {
 }
 
 // bt_addr_le_t.a holds the MAC address in big-endian.
-static int get_mac_addr(bt_addr_le_t *out) {
+static int get_mac_addr(bt_addr_le_t* out) {
   struct bt_le_oob oob;
   RET_IF_ERR(bt_le_oob_get_local(BT_ID_DEFAULT, &oob));
-  const uint8_t *addr = oob.addr.a.val;
+  const uint8_t* addr = oob.addr.a.val;
   LOG_INF("MAC Address: %02x:%02x:%02x:%02x:%02x:%02x",
           addr[5], addr[4], addr[3], addr[2], addr[1], addr[0]);
   *out = oob.addr;
@@ -74,7 +74,7 @@ int prst_ble_adv_stop() {
   return bt_le_adv_stop();
 }
 
-int prst_ble_adv_set_data(const prst_sensors_t *sensors) {
+int prst_ble_adv_set_data(const prst_sensors_t* sensors) {
   return prst_ble_encode_service_data(sensors, &mac_addr, service_data,
                                       sizeof(service_data));
 }

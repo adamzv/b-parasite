@@ -9,4 +9,5 @@ python3 code/tests/recovery/run_tests.py
 bash code/tests/application/run.sh
 python3 -m unittest discover -s code/tests/identity -p 'test_*.py' -v
 python3 code/tests/counters/run_tests.py
+python3 -m unittest discover -s code/tests/scripts -p 'test_*.py' -v
 sh code/tests/integration/run.sh

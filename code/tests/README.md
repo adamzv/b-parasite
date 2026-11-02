@@ -1,15 +1,20 @@
 # Host regression tests
 
-Run from the b-parasite project root:
+From the repository root:
 
 ```sh
-BPARASITE_TEST_PYTHON=/path/to/python-with-websocket-client \
-ZIGBEE_TEST_NODE_MODULES=/path/to/node_modules \
-bash code/tests/run.sh
+npm ci
+npm test
 ```
 
-The Node modules must contain `zigbee-herdsman-converters` and `zigbee-herdsman`. Converter tests were checked with Zigbee2MQTT 2.12.1's converter dependency, 26.76.0. The Python integration interpreter needs `websocket-client`; other host suites use Python's standard library. A C11 compiler, Bash and Node are required.
+Requirements: Node 22 or newer, Python 3, Bash and a C11 compiler (`cc`, or set `CC`). The Node dependency versions are pinned in `package-lock.json`. There are no Python package dependencies and no Home Assistant connection is needed.
 
-Sensor, application, boot guard and recovery tests compile production C against controlled Zephyr/hardware boundaries. Integration tests use the actual converter dependencies and Python assistant. Identity/package tests run the scripts on temporary fixtures. Per-suite verification notes record the regressions seen before fixes.
+The suites compile the sensor, application, recovery, boot guard and counter code against controlled Zephyr interfaces. They also check firmware identity, release packaging, Docker build paths and the external converter against real `zigbee-herdsman` dependencies. The per-suite notes describe the original regressions.
 
-These tests do not measure sleep current or prove radio recovery on hardware. Build the nRF52840 firmware separately before packaging.
+These are host tests. A successful run doesn't measure battery current, transmit radio packets or prove that a board rejoins a real coordinator. Build the firmware and check those behaviors on hardware separately.
+
+To test against another installed converter dependency tree:
+
+```sh
+ZIGBEE_TEST_NODE_MODULES=/absolute/path/to/node_modules npm test
+```

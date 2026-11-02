@@ -7,49 +7,54 @@
 #include <unistd.h>
 #include <zephyr/fs/fs.h>
 #include <zephyr/kernel.h>
+
 #include "boot_loop_guard.h"
 
-static const char *root;
+static const char* root;
 static const char legacy_file[] = "/lfs/boots_since_join";
 static const char crash_file[] = "/lfs/crash_boots";
-static const char *fault;
+static const char* fault;
 static int handles, closes, writes, unlinks, submissions, unlink_failures, submit_failures;
-static struct k_work *queued;
+static struct k_work* queued;
 static bool failed;
 
-#define CHECK(condition) do { if (!(condition)) { \
-  fprintf(stderr, "FAIL line %d: %s\n", __LINE__, #condition); failed = true; \
-} } while (0)
+#define CHECK(condition)                                           \
+  do {                                                             \
+    if (!(condition)) {                                            \
+      fprintf(stderr, "FAIL line %d: %s\n", __LINE__, #condition); \
+      failed = true;                                               \
+    }                                                              \
+  } while (0)
 
-static void local_path(const char *path, char *out, size_t size) {
+static void local_path(const char* path, char* out, size_t size) {
   int n = snprintf(out, size, "%s/%s", root, strrchr(path, '/') + 1);
   if (n < 0 || (size_t)n >= size) abort();
 }
-static void seed(const char *path, uint32_t count) {
+static void seed(const char* path, uint32_t count) {
   char local[1024];
   local_path(path, local, sizeof(local));
-  FILE *file = fopen(local, "wb");
+  FILE* file = fopen(local, "wb");
   if (!file || fwrite(&count, sizeof(count), 1, file) != 1 || fclose(file)) abort();
 }
-static bool stored(const char *path, uint32_t count) {
+static bool stored(const char* path, uint32_t count) {
   char local[1024];
   local_path(path, local, sizeof(local));
-  FILE *file = fopen(local, "rb");
+  FILE* file = fopen(local, "rb");
   if (!file) return false;
   uint32_t value = 0;
   size_t n = fread(&value, 1, sizeof(value), file);
   fclose(file);
   return n == sizeof(value) && value == count;
 }
-static bool exists(const char *path) {
+static bool exists(const char* path) {
   char local[1024];
   local_path(path, local, sizeof(local));
   return access(local, F_OK) == 0;
 }
-static bool inject(const char *operation) { return fault && strcmp(fault, operation) == 0; }
+static bool inject(const char* operation) { return fault && strcmp(fault, operation) == 0; }
 
-void fs_file_t_init(struct fs_file_t *file) { file->fd = -1; }
-int fs_open(struct fs_file_t *file, const char *path, int mode) {
+void fs_file_t_init(struct fs_file_t* file) { file->fd = -1; }
+int fs_open(struct fs_file_t* file, const char* path, int mode) {
   if (inject("open_error")) return -EIO;
   char local[1024];
   local_path(path, local, sizeof(local));
@@ -58,24 +63,24 @@ int fs_open(struct fs_file_t *file, const char *path, int mode) {
   handles++;
   return 0;
 }
-ssize_t fs_read(struct fs_file_t *file, void *out, size_t size) {
+ssize_t fs_read(struct fs_file_t* file, void* out, size_t size) {
   if (inject("read_error")) return -EIO;
   if (inject("short_read")) size = 2;
   ssize_t n = read(file->fd, out, size);
   return n < 0 ? -errno : n;
 }
-ssize_t fs_write(struct fs_file_t *file, const void *value, size_t size) {
+ssize_t fs_write(struct fs_file_t* file, const void* value, size_t size) {
   writes++;
   if (inject("write_error")) return -EIO;
   if (inject("short_write")) size = 2;
   ssize_t n = write(file->fd, value, size);
   return n < 0 ? -errno : n;
 }
-int fs_seek(struct fs_file_t *file, off_t offset, int whence) {
+int fs_seek(struct fs_file_t* file, off_t offset, int whence) {
   if (inject("seek_error")) return -EIO;
   return lseek(file->fd, offset, whence) < 0 ? -errno : 0;
 }
-int fs_close(struct fs_file_t *file) {
+int fs_close(struct fs_file_t* file) {
   closes++;
   if (file->fd < 0) abort();
   int result = close(file->fd);
@@ -84,16 +89,22 @@ int fs_close(struct fs_file_t *file) {
   // Zephyr LittleFS releases file data even when its close reports an error.
   return inject("close_error") ? -EIO : (result < 0 ? -errno : 0);
 }
-int fs_unlink(const char *path) {
+int fs_unlink(const char* path) {
   unlinks++;
-  if (unlink_failures > 0) { unlink_failures--; return -EIO; }
+  if (unlink_failures > 0) {
+    unlink_failures--;
+    return -EIO;
+  }
   char local[1024];
   local_path(path, local, sizeof(local));
   return unlink(local) < 0 ? -errno : 0;
 }
-int k_work_submit(struct k_work *work) {
+int k_work_submit(struct k_work* work) {
   submissions++;
-  if (submit_failures > 0) { submit_failures--; return -EIO; }
+  if (submit_failures > 0) {
+    submit_failures--;
+    return -EIO;
+  }
   if (work->pending) return 0;
   if (queued) abort();
   work->pending = true;
@@ -102,15 +113,15 @@ int k_work_submit(struct k_work *work) {
 }
 static void run_work(void) {
   if (!queued) return;
-  struct k_work *work = queued;
+  struct k_work* work = queued;
   queued = NULL;
   work->pending = false;
   work->handler(work);
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   if (argc != 3) return 2;
-  const char *name = argv[1];
+  const char* name = argv[1];
   root = argv[2];
   if (strcmp(name, "legacy_count_ignored") == 0) {
     seed(legacy_file, 12);

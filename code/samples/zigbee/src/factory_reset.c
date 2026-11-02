@@ -45,7 +45,7 @@ static void timer_do_reset(zb_uint8_t unused_param) {
   factory_reset();
 }
 
-static void sw1_factory_reset_check_timer_cb(struct k_timer *timer_id) {
+static void sw1_factory_reset_check_timer_cb(struct k_timer* timer_id) {
   if (!prst_button_poll(PRST_BUTTON_SW1)) {
     LOG_DBG("SW1 button was released, will not factory reset device");
     return;

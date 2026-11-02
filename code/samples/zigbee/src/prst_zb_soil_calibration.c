@@ -1,10 +1,10 @@
 #include "prst_zb_soil_calibration.h"
 
+#include <string.h>
 #include <zephyr/fs/fs.h>
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/sys/util.h>
-#include <string.h>
 
 LOG_MODULE_REGISTER(soil_calibration, CONFIG_LOG_DEFAULT_LEVEL);
 
